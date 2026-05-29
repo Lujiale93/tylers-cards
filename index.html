@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Tyler's Cards 🇸🇬</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green: #1D9E75;
+      --green-light: #E1F5EE;
+      --green-dark: #0F6E56;
+      --red: #E8394A;
+      --red-light: #FDEAEC;
+      --amber: #F5A623;
+      --amber-light: #FEF3E0;
+      --blue: #3B82F6;
+      --blue-light: #EFF6FF;
+      --purple: #7C3AED;
+      --purple-light: #F5F3FF;
+      --bg: #FFFDF7;
+      --card-bg: #FFFFFF;
+      --text: #1A1A2E;
+      --text-muted: #6B7280;
+      --border: rgba(0,0,0,0.08);
+      --shadow: 0 8px 32px rgba(0,0,0,0.10);
+      --shadow-card: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    /* Tropical background pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(29,158,117,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(245,166,35,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(59,130,246,0.06) 0%, transparent 40%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #app {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      padding: 1.5rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── WELCOME SCREEN ── */
+    #welcome { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+    .logo-area { text-align: center; margin-bottom: 2rem; }
+    .logo-emoji { font-size: 56px; display: block; margin-bottom: 0.5rem; animation: bounce 2s infinite; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .logo-area h1 {
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+    .logo-area h1 span { color: var(--green); }
+    .logo-area p {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .cat-btn {
+      padding: 1rem 0.75rem;
+      border-radius: 16px;
+      border: 2.5px solid var(--border);
+      background: var(--card-bg);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+      box-shadow: var(--shadow-card);
+    }
+    .cat-btn .cat-icon { font-size: 32px; display: block; margin-bottom: 6px; }
+    .cat-btn .cat-name { font-size: 14px; font-weight: 800; color: var(--text); }
+    .cat-btn .cat-count { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+
+    .cat-btn.active-animals { border-color: var(--green); background: var(--green-light); }
+    .cat-btn.active-animals .cat-name { color: var(--green-dark); }
+    .cat-btn.active-foods { border-color: var(--amber); background: var(--amber-light); }
+    .cat-btn.active-foods .cat-name { color: #92400E; }
+    .cat-btn.active-colors { border-color: var(--red); background: var(--red-light); }
+    .cat-btn.active-colors .cat-name { color: #9B1C2A; }
+    .cat-btn.active-shapes { border-color: var(--blue); background: var(--blue-light); }
+    .cat-btn.active-shapes .cat-name { color: #1E40AF; }
+
+    .start-btn {
+      width: 100%;
+      padding: 18px;
+      border-radius: 18px;
+      border: none;
+      background: var(--green);
+      color: white;
+      font-size: 20px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(29,158,117,0.35);
+      transition: all 0.15s;
+      font-family: 'Nunito', sans-serif;
+      letter-spacing: 0.3px;
+    }
+    .start-btn:active { transform: scale(0.97); box-shadow: none; }
+
+    /* ── FLASHCARD SCREEN ── */
+    #flashcard-view { flex: 1; display: none; flex-direction: column; }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .home-btn {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--card-bg);
+      cursor: pointer;
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-card);
+    }
+    .progress-text {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+    .score-pill {
+      background: var(--green-light);
+      color: var(--green-dark);
+      border-radius: 99px;
+      padding: 5px 12px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: rgba(0,0,0,0.07);
+      border-radius: 99px;
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--green);
+      transition: width 0.4s ease;
+    }
+
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 800;
+      border-radius: 99px;
+      padding: 5px 14px;
+      margin-bottom: 14px;
+    }
+    .badge-animals { background: var(--green-light); color: var(--green-dark); }
+    .badge-foods { background: var(--amber-light); color: #92400E; }
+    .badge-colors { background: var(--red-light); color: #9B1C2A; }
+    .badge-shapes { background: var(--blue-light); color: #1E40AF; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 28px;
+      padding: 2.5rem 1.5rem 2rem;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      box-shadow: var(--shadow);
+      border: 1.5px solid var(--border);
+      transition: transform 0.12s, box-shadow 0.12s;
+      margin-bottom: 1rem;
+      user-select: none;
+    }
+    .card:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+
+    .sound-btn {
+      position: absolute;
+      top: 14px; right: 14px;
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      font-size: 20px;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.1s;
+      box-shadow: var(--shadow-card);
+    }
+    .sound-btn:active { transform: scale(0.9); }
+
+    .card-emoji {
+      font-size: 120px;
+      line-height: 1;
+      margin-bottom: 1.25rem;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));
+      animation: pop-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes pop-in {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .card-word {
+      font-size: 34px;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 6px;
+      text-align: center;
+      letter-spacing: -0.5px;
+    }
+    .card-sub {
+      font-size: 15px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-align: center;
+    }
+    .card-singlish {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--green-dark);
+      font-weight: 700;
+      font-style: italic;
+      text-align: center;
+      background: var(--green-light);
+      padding: 6px 14px;
+      border-radius: 99px;
+    }
+
+    .tap-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .nav-row {
+      display: flex;
+      gap: 10px;
+    }
+    .nav-btn {
+      flex: 1;
+      padding: 16px;
+      border-radius: 16px;
+      border: 2px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      box-shadow: var(--shadow-card);
+      transition: all 0.12s;
+    }
+    .nav-btn:active { transform: scale(0.97); }
+    .nav-btn.primary {
+      background: var(--green);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(29,158,117,0.3);
+    }
+
+    /* ── DONE SCREEN ── */
+    #done-view {
+      flex: 1; display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    .done-emoji { font-size: 80px; margin-bottom: 1rem; animation: spin-bounce 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes spin-bounce {
+      0% { transform: scale(0) rotate(-20deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+    #done-view h2 { font-size: 28px; font-weight: 900; color: var(--text); margin-bottom: 8px; }
+    #done-view p { font-size: 16px; color: var(--text-muted); font-weight: 600; margin-bottom: 2rem; }
+
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      flex: 1;
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1.5px solid var(--border);
+      padding: 1rem;
+      box-shadow: var(--shadow-card);
+    }
+    .stat-num { font-size: 28px; font-weight: 900; color: var(--green); }
+    .stat-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
+
+    .again-btn {
+      width: 100%;
+      padding: 18px;
+      border-radius: 18px;
+      border: none;
+      background: var(--green);
+      color: white;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(29,158,117,0.35);
+      font-family: 'Nunito', sans-serif;
+      margin-bottom: 10px;
+      transition: all 0.12s;
+    }
+    .again-btn:active { transform: scale(0.97); }
+    .back-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 16px;
+      border: 2px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      box-shadow: var(--shadow-card);
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- WELCOME -->
+  <div id="welcome">
+    <div class="logo-area">
+      <span class="logo-emoji">🦦</span>
+      <h1>Tyler's <span>Cards</span></h1>
+      <p>Wah, time to learn something new! 🇸🇬</p>
+    </div>
+
+    <div class="section-label">Choose categories</div>
+    <div class="cat-grid" id="cat-grid">
+      <button class="cat-btn active-animals" data-cat="animals" onclick="toggleCat(this)">
+        <span class="cat-icon">🦧</span>
+        <div class="cat-name">Animals</div>
+        <div class="cat-count">8 cards</div>
+      </button>
+      <button class="cat-btn active-foods" data-cat="foods" onclick="toggleCat(this)">
+        <span class="cat-icon">🥞</span>
+        <div class="cat-name">Foods</div>
+        <div class="cat-count">8 cards</div>
+      </button>
+      <button class="cat-btn active-colors" data-cat="colors" onclick="toggleCat(this)">
+        <span class="cat-icon">🌈</span>
+        <div class="cat-name">Colours</div>
+        <div class="cat-count">8 cards</div>
+      </button>
+      <button class="cat-btn active-shapes" data-cat="shapes" onclick="toggleCat(this)">
+        <span class="cat-icon">⭐</span>
+        <div class="cat-name">Shapes</div>
+        <div class="cat-count">8 cards</div>
+      </button>
+    </div>
+
+    <button class="start-btn" onclick="startCards()">Let's Go! 🚀</button>
+  </div>
+
+  <!-- FLASHCARD -->
+  <div id="flashcard-view">
+    <div class="top-bar">
+      <button class="home-btn" onclick="goHome()">🏠</button>
+      <span class="progress-text" id="progress-text">1 / 8</span>
+      <span class="score-pill" id="score-pill">⭐ 0</span>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress" style="width:0%"></div>
+    </div>
+
+    <div style="text-align:center; margin-bottom:12px;">
+      <span class="category-badge" id="cat-badge">🦧 Animals</span>
+    </div>
+
+    <div class="card" onclick="speakWord()" id="card">
+      <button class="sound-btn" onclick="event.stopPropagation(); speakWord()">🔊</button>
+      <div class="card-emoji" id="card-emoji">🦧</div>
+      <div class="card-word" id="card-word">Orangutan</div>
+      <div class="card-sub" id="card-sub">Lives in Borneo rainforest</div>
+      <div class="card-singlish" id="card-singlish">Can find at Singapore Zoo!</div>
+    </div>
+
+    <p class="tap-hint">👆 Tap the card to hear the word</p>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevCard()">← Back</button>
+      <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+    </div>
+  </div>
+
+  <!-- DONE -->
+  <div id="done-view">
+    <div class="done-emoji">🎉</div>
+    <h2>Wah, steady lah Tyler!</h2>
+    <p>You finished all the cards!<br>So clever, good boy!</p>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-cards">0</div>
+        <div class="stat-label">Cards</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-cats">0</div>
+        <div class="stat-label">Categories</div>
+      </div>
+    </div>
+    <button class="again-btn" onclick="startCards()">Play Again! 🔄</button>
+    <button class="back-btn" onclick="goHome()">Choose Categories</button>
+  </div>
+
+</div>
+
+<script>
+  const ALL_CARDS = {
+    animals: [
+      { e:"🦧", w:"Orangutan", s:"Great ape from Borneo", sg:"Can find at Singapore Zoo!" },
+      { e:"🦦", w:"Otter", s:"Loves to swim in rivers", sg:"Bishan otters are famous!" },
+      { e:"🦜", w:"Hornbill", s:"Colourful tropical bird", sg:"National bird of Malaysia!" },
+      { e:"🦎", w:"Monitor Lizard", s:"Big lizard that swims", sg:"Can see in Bishan Park!" },
+      { e:"🐘", w:"Elephant", s:"Very big and strong", sg:"At Night Safari, wah big!" },
+      { e:"🦁", w:"Lion", s:"King of animals", sg:"Merlion is our lion!" },
+      { e:"🐒", w:"Monkey", s:"Loves to climb trees", sg:"MacRitchie has monkeys!" },
+      { e:"🦋", w:"Butterfly", s:"Has beautiful wings", sg:"Butterfly Park on Sentosa!" },
+    ],
+    foods: [
+      { e:"🍞", w:"Kaya Toast", s:"Yummy Singapore breakfast", sg:"Ya Kun is the best!" },
+      { e:"🥞", w:"Roti Prata", s:"Crispy flatbread", sg:"With curry sauce, yum!" },
+      { e:"🥚", w:"Soft Egg", s:"Runny and smooth", sg:"Goes with kaya toast!" },
+      { e:"🌮", w:"Satay", s:"Grilled meat on sticks", sg:"Lau Pa Sat got the best!" },
+      { e:"🍜", w:"Laksa", s:"Spicy noodle soup", sg:"Singapore favourite!" },
+      { e:"🥭", w:"Mango", s:"Sweet and juicy fruit", sg:"Tropical fruit, the best!" },
+      { e:"🥥", w:"Coconut", s:"Drink the cool water", sg:"Fresh coconut, so shiok!" },
+      { e:"🍡", w:"Durian", s:"King of all fruits", sg:"Wah, smelly but so nice!" },
+    ],
+    colors: [
+      { e:"🔴", w:"Red", s:"Bright and bold colour", sg:"Singapore flag is red!" },
+      { e:"🟠", w:"Orange", s:"Warm like a sunset", sg:"HDB lights at night!" },
+      { e:"🟡", w:"Yellow", s:"Bright like the sun", sg:"Sunny Singapore!" },
+      { e:"🟢", w:"Green", s:"Colour of the trees", sg:"Gardens by the Bay!" },
+      { e:"🔵", w:"Blue", s:"Colour of the ocean", sg:"Sentosa beach water!" },
+      { e:"⚪", w:"White", s:"Colour of the clouds", sg:"Singapore flag is white!" },
+      { e:"🟣", w:"Purple", s:"A royal colour", sg:"Vanda Miss Joaquim!" },
+      { e:"🩷", w:"Pink", s:"A sweet soft colour", sg:"Bougainvillea flowers!" },
+    ],
+    shapes: [
+      { e:"⭕", w:"Circle", s:"Round and round!", sg:"Like a roti prata!" },
+      { e:"🔷", w:"Diamond", s:"Four pointy sides", sg:"Shiny like a gem!" },
+      { e:"🔺", w:"Triangle", s:"Has three sides", sg:"Roti prata folded up!" },
+      { e:"⬛", w:"Square", s:"Four equal sides", sg:"Like a HDB window!" },
+      { e:"⭐", w:"Star", s:"Has five points", sg:"On the Singapore flag!" },
+      { e:"🔶", w:"Rectangle", s:"Like a long square", sg:"Like a bus!" },
+      { e:"❤️", w:"Heart", s:"The shape of love", sg:"Daddy loves Tyler!" },
+      { e:"🌙", w:"Crescent", s:"Curved like the moon", sg:"On the Singapore flag!" },
+    ]
+  };
+
+  const catMeta = {
+    animals: { label: "Animals",  icon: "🦧", cls: "badge-animals" },
+    foods:   { label: "Foods",    icon: "🥞", cls: "badge-foods" },
+    colors:  { label: "Colours",  icon: "🌈", cls: "badge-colors" },
+    shapes:  { label: "Shapes",   icon: "⭐", cls: "badge-shapes" },
+  };
+
+  let deck = [];
+  let idx = 0;
+  let score = 0;
+  let selectedCats = new Set(["animals","foods","colors","shapes"]);
+
+  function toggleCat(btn) {
+    const cat = btn.dataset.cat;
+    if (selectedCats.has(cat) && selectedCats.size > 1) {
+      selectedCats.delete(cat);
+      btn.className = "cat-btn";
+    } else if (!selectedCats.has(cat)) {
+      selectedCats.add(cat);
+      btn.className = "cat-btn active-" + cat;
+    }
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function startCards() {
+    deck = [];
+    selectedCats.forEach(cat => deck.push(...ALL_CARDS[cat].map(c => ({...c, cat}))));
+    shuffle(deck);
+    idx = 0; score = 0;
+    document.getElementById("score-pill").textContent = "⭐ 0";
+    document.getElementById("welcome").style.display = "none";
+    document.getElementById("done-view").style.display = "none";
+    const fv = document.getElementById("flashcard-view");
+    fv.style.display = "flex";
+    showCard();
+  }
+
+  function showCard() {
+    if (idx >= deck.length) { showDone(); return; }
+    const c = deck[idx];
+    const emoji = document.getElementById("card-emoji");
+    emoji.style.animation = "none";
+    emoji.offsetHeight;
+    emoji.style.animation = "pop-in 0.3s cubic-bezier(0.34,1.56,0.64,1)";
+    emoji.textContent = c.e;
+    document.getElementById("card-word").textContent = c.w;
+    document.getElementById("card-sub").textContent = c.s;
+    document.getElementById("card-singlish").textContent = c.sg;
+
+    const meta = catMeta[c.cat];
+    const badge = document.getElementById("cat-badge");
+    badge.textContent = meta.icon + " " + meta.label;
+    badge.className = "category-badge " + meta.cls;
+
+    const pct = Math.round((idx / deck.length) * 100);
+    document.getElementById("progress").style.width = pct + "%";
+    document.getElementById("progress-text").textContent = (idx + 1) + " / " + deck.length;
+
+    setTimeout(() => speakWord(), 300);
+  }
+
+  function speakWord() {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(deck[idx].w);
+    utt.rate = 0.8;
+    utt.pitch = 1.15;
+    utt.volume = 1;
+    window.speechSynthesis.speak(utt);
+    score++;
+    document.getElementById("score-pill").textContent = "⭐ " + score;
+  }
+
+  function nextCard() { idx++; showCard(); }
+  function prevCard() { if (idx > 0) { idx--; showCard(); } }
+
+  function showDone() {
+    document.getElementById("flashcard-view").style.display = "none";
+    const dv = document.getElementById("done-view");
+    dv.style.display = "flex";
+    document.getElementById("stat-cards").textContent = deck.length;
+    document.getElementById("stat-cats").textContent = selectedCats.size;
+  }
+
+  function goHome() {
+    document.getElementById("flashcard-view").style.display = "none";
+    document.getElementById("done-view").style.display = "none";
+    document.getElementById("welcome").style.display = "flex";
+  }
+
+  // Swipe support
+  let touchStartX = 0;
+  document.getElementById("card") && document.addEventListener("touchstart", e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener("touchend", e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 60 && document.getElementById("flashcard-view").style.display !== "none") {
+      if (diff > 0) nextCard(); else prevCard();
+    }
+  });
+</script>
+</body>
+</html>
